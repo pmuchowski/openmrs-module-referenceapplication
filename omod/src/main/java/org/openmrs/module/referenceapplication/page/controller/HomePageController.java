@@ -20,11 +20,15 @@ import org.openmrs.module.appframework.context.AppContextModel;
 import org.openmrs.module.appframework.service.AppFrameworkService;
 import org.openmrs.module.appui.UiSessionContext;
 import org.openmrs.module.referenceapplication.ReferenceApplicationConstants;
-import org.openmrs.module.webservices.rest.SimpleObject;
+import org.openmrs.module.webservices.rest.web.ConversionUtil;
+import org.openmrs.module.webservices.rest.web.representation.Representation;
 import org.openmrs.ui.framework.annotation.SpringBean;
 import org.openmrs.ui.framework.page.PageModel;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Spring MVC controller that takes over /index.htm and processes requests to show the home page so
@@ -43,24 +47,22 @@ public class HomePageController {
     /**
      * @should limit which apps are shown on the homepage based on location
      */
-    public Object controller(PageModel model,
+    public void get(PageModel model,
                              @SpringBean("appFrameworkService") AppFrameworkService appFrameworkService,
                              UiSessionContext sessionContext) {
 
         AppContextModel contextModel = new AppContextModel();
-        SimpleObject map = new SimpleObject();
+        Map<String, Object> map = new HashMap<String, Object>();
 
         map.put("currentUser", sessionContext.getCurrentUser());
         map.put("currentProvider", sessionContext.getCurrentProvider());
         map.put("sessionLocation", sessionContext.getSessionLocation());
 
-        contextModel = contextModel.with("sessionContext", map);
+        contextModel.put("sessionContext", ConversionUtil.convertToRepresentation(map, Representation.DEFAULT));
 
         model.addAttribute("extensions",
                 appFrameworkService.getExtensionsForCurrentUser(ReferenceApplicationConstants.HOME_PAGE_EXTENSION_POINT_ID, contextModel));
         model.addAttribute("authenticatedUser", Context.getAuthenticatedUser());
-
-        return null;
     }
 
 }

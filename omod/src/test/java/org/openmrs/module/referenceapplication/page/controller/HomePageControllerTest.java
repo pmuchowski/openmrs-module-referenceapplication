@@ -29,6 +29,8 @@ import org.openmrs.module.appframework.service.AppFrameworkService;
 import org.openmrs.module.appframework.service.AppFrameworkServiceImpl;
 import org.openmrs.module.appui.UiSessionContext;
 import org.openmrs.module.referenceapplication.ReferenceApplicationConstants;
+import org.openmrs.module.webservices.rest.web.api.RestService;
+import org.openmrs.module.webservices.rest.web.api.impl.RestServiceImpl;
 import org.openmrs.test.Verifies;
 import org.openmrs.ui.framework.page.PageModel;
 import org.openmrs.util.LocationUtility;
@@ -50,19 +52,20 @@ import static org.powermock.api.mockito.PowerMockito.mockStatic;
 public class HomePageControllerTest {
 
     /**
-     * @see HomePageController#controller(org.openmrs.ui.framework.page.PageModel model,
+     * @see HomePageController#get(org.openmrs.ui.framework.page.PageModel model,
      * org.openmrs.module.appframework.service.AppFrameworkService appFrameworkService,
      * org.openmrs.module.appui.UiSessionContext sessionContext)
      */
     @Test
-    @Verifies(value = "should limit which apps are shown on the homepage based on location", method = "controller(PageModel,AppFrameworkService,UiSessionContext)")
-    public void controller_shouldLimitWhichAppsAreShownOnTheHomePageBasedOnLocation() throws Exception {
+    @Verifies(value = "should limit which apps are shown on the homepage based on location", method = "get(PageModel,AppFrameworkService,UiSessionContext)")
+    public void get_shouldLimitWhichAppsAreShownOnTheHomePageBasedOnLocation() throws Exception {
         UserContext userContext= mock(UserContext.class);
         when(userContext.hasPrivilege("")).thenReturn(Boolean.TRUE);
 
         mockStatic(Context.class);
         when(Context.isAuthenticated()).thenReturn(true);
         when(Context.getUserContext()).thenReturn(userContext);
+        when(Context.getService(RestService.class)).thenReturn(new RestServiceImpl());
 
         CustomAppFrameworkConfig appFrameworkConfig = mock(CustomAppFrameworkConfig.class);
 
@@ -116,7 +119,7 @@ public class HomePageControllerTest {
         sessionContext.setSessionLocation(location);
         sessionContext.setUserContext(userContext);
 
-        new HomePageController().controller(pageModel, frameworkService, sessionContext);
+        new HomePageController().get(pageModel, frameworkService, sessionContext);
 
         assertEquals(3, ((ArrayList) pageModel.get("extensions")).size());
 
